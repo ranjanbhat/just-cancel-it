@@ -4,7 +4,7 @@ A small browser game about dark patterns.
 
 In 2019 you started a free trial of Glimmr+, a streaming service you've opened twice. You've been paying $14.99 a month ever since. Today you cancel it. Every trick you fall for gets added to your bill.
 
-**[Play it here](https://YOUR-USERNAME.github.io/just-cancel-it/)**
+**[Play it here](https://ranjanbhat.github.io/just-cancel-it/)**
 
 ## What's inside
 

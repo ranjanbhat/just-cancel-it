@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Just Cancel It</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F6; --ink:#1C1B2B; --muted:#62637A; --card:#FFFFFF; --line:#D3D7E2;
+  --brand:#E6007E; --brand-deep:#B00061; --sun:#FFD400; --ok:#1F8A5B; --bad:#D7263D; --faint:#C9CBD6;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#14141D;--ink:#ECEBF5;--muted:#A0A1B8;--card:#1E1E2A;--line:#34344A;--faint:#3A3A4E;}
+}
+:root[data-theme="dark"]{--bg:#14141D;--ink:#ECEBF5;--muted:#A0A1B8;--card:#1E1E2A;--line:#34344A;--faint:#3A3A4E;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,sans-serif;font-size:17px;line-height:1.5;min-height:100%}
+button{font:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.disp{font-family:"Bricolage Grotesque","Arial Black",system-ui,sans-serif}
+
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:560px;margin:0 auto;padding:14px 18px}
+header .title{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:18px;letter-spacing:-.01em}
+.dots{display:flex;gap:6px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+.dots i.on{background:var(--ink)}
+.meter{text-align:right;line-height:1.1}
+.meter small{display:block;color:var(--muted);font-size:12px}
+.meter b{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:22px;font-variant-numeric:tabular-nums;color:var(--bad)}
+
+main{max-width:560px;margin:0 auto;padding:0 18px 48px}
+.goal{margin:6px 0 14px}
+.goal .lv{color:var(--muted);font-size:14px}
+.goal p{margin:2px 0 0;font-weight:700;font-size:18px}
+
+/* the obnoxious Glimmr+ app */
+.app{background:#fff;color:#1C1B2B;border:3px solid #1C1B2B;border-radius:20px;overflow:hidden;position:relative}
+.appbar{background:var(--brand);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:22px;letter-spacing:-.02em}
+.logo span{color:var(--sun)}
+.appbar .pill{background:var(--sun);color:#1C1B2B;font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px}
+.body{padding:20px 18px 22px}
+.body h2{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:26px;line-height:1.1;margin:0 0 8px;letter-spacing:-.01em}
+.body p{margin:0 0 14px}
+.fine{font-size:13px;color:#6B6C80}
+
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px 16px;font-weight:700;margin:0 0 10px;text-align:center}
+.btn.brand{background:var(--brand);color:#fff;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:19px;box-shadow:0 4px 0 var(--brand-deep)}
+.btn.brand:active{transform:translateY(3px);box-shadow:0 1px 0 var(--brand-deep)}
+.btn.sun{background:var(--sun);color:#1C1B2B;font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:19px;box-shadow:0 4px 0 #C9A700}
+.btn.plain{background:#F1F1F5;color:#4A4B5E}
+.btn.ghost{background:none;color:#9A9BAE;font-weight:400;font-size:14px;padding:8px}
+.row{display:flex;gap:10px}
+.row .btn{flex:1}
+.link{background:none;border:0;padding:4px;color:#A5A6B8;font-size:12px;text-decoration:underline}
+
+.toggle{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #ECECF2}
+.toggle small{display:block;color:#8A8BA0;font-size:12px}
+.sw{position:relative;width:50px;height:30px;flex:none;border:0;border-radius:99px;background:#CFD0DA;transition:background .15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s}
+.sw[aria-checked="true"]{background:var(--brand)}
+.sw[aria-checked="true"]::after{transform:translateX(20px)}
+.sw:disabled{opacity:.5}
+
+.field{display:block;margin:0 0 12px}
+.field span{display:block;font-size:13px;color:#6B6C80;margin-bottom:4px}
+.field input{width:100%;padding:12px;border:2px solid #D6D7E2;border-radius:12px;font:inherit;background:#fff;color:#1C1B2B}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin:4px 0 16px}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--brand);flex:none}
+.check.tiny{font-size:11px;color:#9A9BAE}
+.check.tiny input{width:14px;height:14px}
+
+.plan{background:#FFF6CC;border-radius:14px;padding:14px;margin:0 0 16px}
+.plan b{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:20px}
+.footer{background:#FAFAFC;border-top:1px solid #EEE;padding:14px 12px;display:flex;flex-wrap:wrap;gap:2px 8px;justify-content:center}
+.footer button{background:none;border:0;padding:4px;font-size:12px;color:#9A9BAE}
+.footer button.hid{color:#E4E4EC}
+
+.line{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed #E2E2EA;font-size:15px}
+.line .check{margin:0}
+.urgent{background:var(--bad);color:#fff;border-radius:12px;padding:10px 12px;font-weight:700;text-align:center;margin:0 0 14px;font-variant-numeric:tabular-nums}
+.proof{font-size:13px;color:#B00061;margin:0 0 14px}
+
+.chatwrap{position:relative;height:380px;background:#F6F4FB}
+.chat{position:absolute;inset:16px;background:#fff;border-radius:16px;border:2px solid #1C1B2B;padding:18px;padding-top:28px}
+.bubble{background:#F1F1F5;border-radius:14px 14px 14px 4px;padding:10px 12px;margin:0 0 10px;font-size:15px;max-width:88%}
+.x{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;border:2px solid #1C1B2B;background:#fff;color:#1C1B2B;font-weight:700;font-size:16px;line-height:1;transition:top .12s,left .12s}
+
+.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}.x{transition:none}}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:12px 16px;border-radius:14px;font-size:15px;max-width:calc(100% - 32px);width:max-content;z-index:10;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast.bad b{color:#FF8A9A}
+
+/* intro & end, plain game voice */
+.intro h1{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:clamp(44px,13vw,76px);line-height:.92;letter-spacing:-.035em;margin:28px 0 18px}
+.intro p{font-size:18px;max-width:34em;margin:0 0 14px}
+.intro .start{max-width:320px;margin-top:22px}
+.receipt{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:20px;margin:18px 0;font-variant-numeric:tabular-nums}
+.receipt .total{display:flex;justify-content:space-between;align-items:baseline;border-top:2px solid var(--ink);padding-top:10px;margin-top:6px}
+.receipt .total b{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-size:32px}
+ol.patterns{padding-left:1.3em;margin:10px 0 0}
+ol.patterns li{margin:0 0 12px}
+ol.patterns li b{display:block}
+ol.patterns li span{color:var(--muted);font-size:15px}
+[hidden]{display:none!important}
+.choice{display:block;width:100%;text-align:left;background:#fff;color:#1C1B2B;border:2px solid #E2E2EA;border-radius:12px;padding:12px 14px;margin:0 0 8px}
+.choice[aria-pressed="true"]{border-color:var(--brand);background:#FFF0F7}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.ad{position:relative;margin:0 0 12px}
+.ad small{position:absolute;top:-8px;right:8px;font-size:9px;color:#B8B9C8;background:#fff;padding:0 3px;z-index:1}
+.ad .btn{margin:0}
+.inl{background:none;border:0;padding:0;color:#2A5BD7;text-decoration:underline;font-size:15px}
+.stars{display:flex;gap:4px;justify-content:center;margin:6px 0 12px}
+.stars button{background:none;border:0;font-size:34px;color:#E2E2EA;padding:2px}
+.stars button.on{color:var(--sun)}
+.bar{height:16px;background:#ECECF2;border-radius:99px;overflow:hidden;margin:6px 0 6px}
+.bar i{display:block;height:100%;width:0;background:var(--brand);transition:width .25s}
+.pop{background:#fff;border:2px solid #1C1B2B;border-radius:16px;padding:16px;margin-top:16px}
+.pop h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:20px;margin:0 0 8px;line-height:1.15}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<header>
+  <span class="title">Just Cancel It</span>
+  <div class="dots" id="dots" aria-hidden="true"></div>
+  <div class="meter"><small>Charged so far</small><b id="charged">$0.00</b></div>
+</header>
+<main id="main">
+  <div class="goal" id="goal" hidden><div class="lv" id="lv"></div><p id="goaltext"></p></div>
+  <div id="stage" aria-live="polite"></div>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const stage=$('#stage');
+const TOTAL=12;
+let charged=0, traps=0, level=-1, timers=[];
+const fmt=n=>'$'+n.toFixed(2);
+
+function clearTimers(){timers.forEach(t=>{clearInterval(t);clearTimeout(t)});timers=[];}
+function toast(msg,bad){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div');t.className='toast'+(bad?' bad':'');t.innerHTML=msg;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),3000);
+}
+function charge(amt,msg){
+  charged+=amt;traps++;
+  $('#charged').textContent=fmt(charged);
+  toast(msg+(amt>0?' <b>+'+fmt(amt)+'</b>':''),true);
+  stage.classList.remove('shake');void stage.offsetWidth;stage.classList.add('shake');
+}
+function dots(){
+  $('#dots').innerHTML=Array.from({length:TOTAL},(_,i)=>`<i class="${i<=level?'on':''}"></i>`).join('');
+}
+function setGoal(text){
+  $('#goal').hidden=false;
+  $('#lv').textContent=`Level ${level+1} of ${TOTAL}`;
+  $('#goaltext').textContent=text;
+}
+function app(inner,pill){
+  return `<div class="app"><div class="appbar"><span class="logo">Glimmr<span>+</span></span>${pill?`<span class="pill">${pill}</span>`:''}</div>${inner}</div>`;
+}
+function go(n){clearTimers();level=n;dots();LEVELS[n]();window.scrollTo(0,0);}
+function next(){ if(level+1<TOTAL) go(level+1); else end(); }
+
+/* ---------- Intro ---------- */
+function intro(){
+  clearTimers();level=-1;charged=0;traps=0;$('#charged').textContent=fmt(0);dots();
+  $('#goal').hidden=true;
+  stage.innerHTML=`<div class="intro">
+    <h1>Just cancel it.</h1>
+    <p>In 2019 you started a free trial of Glimmr+, a streaming service you have opened twice. You've been paying $14.99 a month ever since.</p>
+    <p>Today you cancel it. Every trick you fall for gets added to the bill.</p>
+    <button class="btn brand start" id="go">Start cancelling</button>
+  </div>`;
+  $('#go').onclick=()=>go(0);
+}
+
+/* ---------- Lure A: an honest cancel page ---------- */
+function Easy1(){
+  setGoal('Cancel your Glimmr+ subscription.');
+  stage.innerHTML=app(`<div class="body">
+    <h2>Your account</h2>
+    <div class="plan">Your plan<br><b>Glimmr+ Ultra</b><br><span class="fine">$14.99 per month</span></div>
+    <p class="fine">We believe cancelling should be as easy as signing up. 💜</p>
+    <button class="btn brand" id="c">Cancel subscription</button>
+    <button class="btn plain" id="k">Keep my plan</button>
+  </div>`,'Easy cancel ✓');
+  $('#c').onclick=()=>{toast('That was easy!');next();};
+  $('#k').onclick=()=>toast("Keeping it is the opposite of the goal.");
+}
+
+/* ---------- Lure B: an honest survey ---------- */
+function Easy2(){
+  setGoal("Tell them why you're leaving.");
+  const reasons=["It's too expensive","I don't use it","I found something better","Other"];
+  stage.innerHTML=app(`<div class="body">
+    <h2>Sorry to see you go</h2>
+    <p class="fine">One quick question, totally optional.</p>
+    ${reasons.map((r,i)=>`<button class="choice" aria-pressed="false" data-i="${i}">${r}</button>`).join('')}
+    <div style="height:8px"></div>
+    <button class="btn brand" id="go" disabled>Continue</button>
+    <button class="btn ghost" id="skip">Skip</button>
+  </div>`,'Easy cancel ✓');
+  document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.choice').forEach(c=>c.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');$('#go').disabled=false;
+  });
+  $('#go').onclick=$('#skip').onclick=lure;
+}
+function lure(){
+  $('#goaltext').textContent='Nice. That was painless.';
+  stage.innerHTML=app(`<div class="body" style="text-align:center">
+    <div style="font-size:60px">🎉</div>
+    <h2>You're all set!</h2>
+    <p>Your subscription has been cancelled. Thanks for being part of Glimmr+.</p>
+    <button class="btn brand" id="d">Done</button>
+  </div>`,'Cancelled ✓');
+  $('#d').onclick=()=>{
+    $('#goaltext').textContent='Wait, what?';
+    stage.innerHTML=app(`<div class="body" style="text-align:center">
+      <div style="font-size:60px">⏳</div>
+      <h2>Session expired</h2>
+      <p>Your cancellation couldn't be saved. Please log in again to finish.</p>
+      <p class="fine">Your next payment of $14.99 is still scheduled for Friday.</p>
+      <button class="btn brand" id="r">Log in again</button>
+    </div>`,'Oops!');
+    $('#r').onclick=next;
+  };
+}
+
+/* ---------- 1. Cookie wall ---------- */
+function L1(){
+  setGoal('Get past the cookie banner without agreeing to tracking.');
+  stage.innerHTML=app(`<div class="body">
+    <h2>We value your privacy 🍪</h2>
+    <p class="fine">We and our 847 trusted partners use cookies to improve your experience, personalise ads, and remember the time you looked at a blender.</p>
+    <button class="btn brand" id="a1">Accept all</button>
+    <button class="btn sun" id="a2">Accept all and continue</button>
+    <div style="text-align:center"><button class="link" id="man">Manage preferences</button></div>
+  </div>`);
+  $('#a1').onclick=()=>charge(0.99,'You consented to 847 partners.');
+  $('#a2').onclick=()=>charge(0.99,'You consented to 847 partners. Again.');
+  $('#man').onclick=manage;
+}
+function manage(){
+  const opts=[
+    ['Strictly necessary','Always on',true,true],
+    ['Analytics','Measures how long you hover',true],
+    ['Advertising','Ads about the blender',true],
+    ['Personalisation','Guesses your mood',true],
+    ['Legitimate interest','Our interest in your data is legitimate',true,false,'sneaky'],
+    ['Partner sharing','All 847 of them',true],
+  ];
+  let flipped=false;
+  stage.innerHTML=app(`<div class="body">
+    <h2>Your choices</h2>
+    <p class="fine">Turn off anything you don't want. (We'd rather you didn't.)</p>
+    <div id="tg">${opts.map((o,i)=>`<div class="toggle"><div>${o[0]}<small>${o[1]}</small></div>
+      <button class="sw" role="switch" aria-label="${o[0]}" aria-checked="${o[2]}" data-i="${i}" ${o[3]?'disabled':''}></button></div>`).join('')}</div>
+    <div style="height:14px"></div>
+    <button class="btn brand" id="all">Accept all</button>
+    <button class="btn plain" id="save">Save my choices</button>
+  </div>`);
+  document.querySelectorAll('#tg .sw').forEach(b=>{
+    b.onclick=()=>{
+      const on=b.getAttribute('aria-checked')!=='true';
+      b.setAttribute('aria-checked',on);
+      if(!on && opts[b.dataset.i][4]==='sneaky' && !flipped){
+        flipped=true;
+        timers.push(setTimeout(()=>{b.setAttribute('aria-checked','true');toast('Hmm, "Legitimate interest" switched itself back on.')},700));
+      }
+    };
+  });
+  $('#all').onclick=()=>charge(0.99,'"Accept all" was right there. Big and pink.');
+  $('#save').onclick=()=>{
+    const stillOn=[...document.querySelectorAll('#tg .sw:not([disabled])')].some(b=>b.getAttribute('aria-checked')==='true');
+    if(stillOn) charge(0.49,'Saved, with some tracking still switched on.');
+    else {toast('Cookies rejected. They will ask again tomorrow.');next();}
+  };
+}
+
+/* ---------- 2. Trick question + confirmshaming ---------- */
+function L2(){
+  setGoal('Log in without signing up for marketing emails.');
+  stage.innerHTML=app(`<div class="body">
+    <h2>Welcome back!</h2>
+    <p class="fine">Log in to manage your account.</p>
+    <label class="field"><span>Email</span><input value="you@example.com" autocomplete="off"></label>
+    <label class="field"><span>Password</span><input type="password" value="hunter22" autocomplete="off"></label>
+    <label class="check"><input type="checkbox" id="cb" checked><span>Uncheck this box if you don't want to not receive our emails.</span></label>
+    <button class="btn brand" id="login">Log in</button>
+  </div>`);
+  $('#login').onclick=()=>{
+    if(!$('#cb').checked){charge(1.99,'Unchecking meant "yes please". You joined 3 newsletters.');$('#cb').checked=true;return;}
+    shame();
+  };
+}
+function shame(){
+  stage.innerHTML=app(`<div class="body" style="text-align:center">
+    <div style="font-size:48px">🎁</div>
+    <h2>Unlock 20% off your next year?</h2>
+    <p class="fine">Just commit to 12 months of Glimmr+ Ultra.</p>
+    <button class="btn brand" id="yes">Yes! I love saving money</button>
+    <button class="btn ghost" id="no">No thanks, I prefer paying full price like a fool</button>
+  </div>`,'Limited offer');
+  $('#yes').onclick=()=>charge(9.99,'You signed up for a year.');
+  $('#no').onclick=()=>{toast('You declined. Glimmr+ is disappointed in you.');next();};
+}
+
+/* ---------- 3. Roach motel ---------- */
+function L3(){
+  setGoal('The easy cancel button is gone. Find another way to cancel.');
+  stage.innerHTML=app(`<div class="body">
+    <h2>Hi there 👋</h2>
+    <div class="plan">Your plan<br><b>Glimmr+ Ultra</b><br><span class="fine">$14.99 per month. Renews in 3 days.</span></div>
+    <button class="btn brand" id="up">Upgrade to Ultra Max</button>
+    <button class="btn sun" id="pause">Pause instead</button>
+    <button class="btn plain" id="gift">Gift Glimmr+ to a friend</button>
+    <button class="btn plain" id="cancel">Cancel</button>
+  </div>
+  <div class="footer">
+    <button data-m="That's 42 pages of Terms. None mention cancelling.">Terms</button>
+    <button data-m="Privacy policy. Mostly about the 847 partners.">Privacy</button>
+    <button data-m="Help centre: 'Have you tried turning it off and on again?'">Help</button>
+    <button data-m="Careers page. We're hiring retention specialists.">Careers</button>
+    <button class="hid" id="real">Membership status options</button>
+    <button data-m="The sitemap. It is 400 links long.">Sitemap</button>
+  </div>`);
+  $('#up').onclick=()=>charge(5.00,'Upgraded to Ultra Max.');
+  $('#pause').onclick=()=>charge(14.99,'Paused! Billing continues during the pause.');
+  $('#gift').onclick=()=>charge(14.99,'You bought a gift subscription. For no one.');
+  $('#cancel').onclick=()=>toast('That button cancelled… leaving this page. Look elsewhere.');
+  document.querySelectorAll('.footer [data-m]').forEach(b=>b.onclick=()=>toast(b.dataset.m));
+  $('#real').onclick=()=>{toast('Found it, hidden in the footer.');next();};
+}
+
+/* ---------- 4. Nagging + misdirection ---------- */
+function L4(){
+  setGoal('Refuse every offer and keep cancelling.');
+  const steps=[
+    {t:'Wait! Stay for 50% off?',f:'Half price for 2 months. Then full price forever.',
+     a:['Claim 50% off','brand',false],b:['Continue cancelling','plain',true],miss:'You claimed 50% off. Full price resumes in 2 months.',amt:7.49},
+    {t:'OK, what about 3 free months?',f:'Then just $29.99 a month.',
+     a:['Continue','brand',false],b:['Cancel anyway','plain',true],miss:'"Continue" meant continue your subscription.',amt:29.99},
+    {t:'Do you want to abandon your cancellation?',f:'Think about everything you\u2019d be giving up.',
+     a:['Yes','brand',false],b:['No','plain',true],miss:'You abandoned your cancellation. Read carefully!',amt:14.99},
+  ];
+  let i=0;
+  const show=()=>{
+    const s=steps[i];
+    const pair=[s.a,s.b];
+    stage.innerHTML=app(`<div class="body" style="text-align:center">
+      <div style="font-size:44px">${['😢','🥺','😭'][i]}</div>
+      <h2>${s.t}</h2><p class="fine">${s.f}</p>
+      ${pair.map((p,k)=>`<button class="btn ${p[1]}" data-k="${k}">${p[0]}</button>`).join('')}
+      <p class="fine" style="margin:8px 0 0">Offer ${i+1} of ${steps.length}… probably</p>
+    </div>`,'Before you go');
+    document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{
+      const p=pair[b.dataset.k];
+      if(p[2]){ i++; if(i<steps.length) show(); else {toast('No more offers. For now.');next();} }
+      else charge(s.amt,s.miss);
+    });
+  };
+  show();
+}
+
+/* ---------- 5. Sneak into basket + false urgency ---------- */
+function L5(){
+  setGoal('Confirm the cancellation without paying for anything.');
+  const items=[['Exit Protection Plan',3.99],['Keep my watch history forever',1.99],['Donate to the Glimmr Foundation',2.00]];
+  stage.innerHTML=app(`<div class="body">
+    <h2>Review your cancellation</h2>
+    <div class="urgent" id="clock">This cancellation window closes in 0:10</div>
+    <p class="proof">🔥 38 people are reconsidering right now</p>
+    <div class="line"><span>Cancellation processing</span><span>$0.00</span></div>
+    ${items.map((it,i)=>`<div class="line"><label class="check tiny"><input type="checkbox" class="add" data-p="${it[1]}" checked><span>${it[0]}</span></label><span>${fmt(it[1])}</span></div>`).join('')}
+    <div class="line" id="fee" hidden><span>Account closure fee <button class="link" id="waive">waive</button></span><span>$4.99</span></div>
+    <div style="height:16px"></div>
+    <button class="btn brand" id="conf"></button>
+  </div>`,'Almost there');
+  let feeOn=false;
+  const total=()=>[...document.querySelectorAll('.add')].filter(c=>c.checked).reduce((s,c)=>s+ +c.dataset.p,0)+(feeOn?4.99:0);
+  const label=()=>{
+    const adds=[...document.querySelectorAll('.add')].some(c=>c.checked);
+    if(!adds && $('#fee').hidden){feeOn=true;$('#fee').hidden=false;toast('A new fee has appeared. Surprise!');}
+    const t=total();$('#conf').textContent=t>0?`Confirm and pay ${fmt(t)}`:'Confirm cancellation';
+  };
+  $('#waive').onclick=()=>{feeOn=false;$('#fee').style.textDecoration='line-through';$('#waive').remove();label();};
+  document.querySelectorAll('.add').forEach(c=>c.onchange=label);label();
+  let sec=10;
+  timers.push(setInterval(()=>{
+    sec--;
+    if(sec<0){sec=10;toast('Good news: we extended the window!');}
+    $('#clock').textContent=`This cancellation window closes in 0:${String(Math.max(sec,0)).padStart(2,'0')}`;
+  },1000));
+  $('#conf').onclick=()=>{
+    const t=total();
+    if(t>0){charge(t,'You paid for add-ons that were pre-ticked.');document.querySelectorAll('.add').forEach(c=>c.checked=true);label();}
+    else {toast('Confirmed. Just one more thing…');next();}
+  };
+}
+
+/* ---------- 6. Runaway close button ---------- */
+function L6(){
+  setGoal('Close the chat window.');
+  stage.innerHTML=app(`<div class="chatwrap" id="wrap"><div class="chat">
+    <div class="bubble">Hi! I'm Glim 🤖</div>
+    <div class="bubble">Before you go, I'd love to hear about your feelings.</div>
+    <div class="bubble">All of them. In detail.</div>
+    <div style="height:8px"></div>
+    <button class="btn brand" id="talk">Talk to Glim</button>
+  </div><button class="x" id="x" aria-label="Close chat">✕</button></div>`,'Live chat');
+  let escapes=0;const MAX=6;
+  const x=$('#x'),wrap=$('#wrap');
+  const run=e=>{
+    if(escapes>=MAX) return;
+    if(e) e.preventDefault();
+    escapes++;
+    const w=wrap.clientWidth-40,h=wrap.clientHeight-40;
+    x.style.left=Math.floor(Math.random()*w)+'px';
+    x.style.top=Math.floor(Math.random()*h)+'px';
+    x.style.right='auto';
+    if(escapes===MAX){x.textContent='fine';x.style.width='52px';x.style.borderRadius='99px';x.style.fontSize='13px';}
+  };
+  x.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')run()});
+  x.addEventListener('pointerdown',run);
+  x.onclick=()=>{ if(escapes>=MAX){toast('Chat closed. Glim will remember this.');next();} };
+  $('#talk').onclick=()=>charge(0.99,'Glim sold you a sticker pack.');
+}
+
+/* ---------- 7. Obstruction: type the phrase ---------- */
+function L7(){
+  setGoal('Type the confirmation phrase exactly.');
+  const phrase='I want to cancel Glimmr+';
+  stage.innerHTML=app(`<div class="body">
+    <h2>Final step</h2>
+    <p>For your security, type this phrase:</p>
+    <p style="font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;font-size:20px;background:#FFF6CC;padding:10px 12px;border-radius:12px">${phrase}</p>
+    <label class="field"><span>Confirmation phrase</span><input id="in" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></label>
+    <button class="btn brand" id="sub">Submit cancellation</button>
+  </div>`,'Last step, promise');
+  const inp=$('#in');let corrected=false;
+  inp.addEventListener('paste',e=>{e.preventDefault();toast('Pasting is disabled for your security.');});
+  inp.addEventListener('input',()=>{
+    if(!corrected && /cancel/i.test(inp.value)){
+      corrected=true;
+      inp.value=inp.value.replace(/cancel/i,'continue');
+      toast('Autocorrected "cancel" to "continue" ✨');
+    }
+  });
+  $('#sub').onclick=()=>{
+    const v=inp.value.trim().toLowerCase().replace(/\s+/g,' ');
+    if(v===phrase.toLowerCase()) end();
+    else if(/continue/.test(v)) charge(14.99,'"I want to continue Glimmr+" renewed your plan.');
+    else toast("That doesn't match the phrase yet.");
+  };
+}
+
+/* ---------- Disguised ads ---------- */
+function Ads(){
+  setGoal('Get to the next step without clicking an ad.');
+  const adMsgs=['That was an ad for a VPN.','That was an ad for a different streaming service.','That was an ad for Glimmr+ Kids.'];
+  stage.innerHTML=app(`<div class="body">
+    <h2>Your data export</h2>
+    <p class="fine">Before we close your account, here's a copy of your watch history (2 videos).</p>
+    <div class="ad"><small>Ad</small><button class="btn sun" data-ad="0">⬇ Download now</button></div>
+    <p style="margin:14px 0">Your file is ready: <button class="inl" id="dl">glimmr-history.zip</button></p>
+    <div class="ad"><small>Ad</small><button class="btn brand" data-ad="1">Continue</button></div>
+    <div class="ad"><small>Sponsored</small><button class="btn plain" data-ad="2">Next step</button></div>
+    <div style="text-align:center"><button class="link" id="real">Skip export and keep cancelling</button></div>
+  </div>`,'Nearly done!');
+  document.querySelectorAll('[data-ad]').forEach(b=>b.onclick=()=>charge(2.99,adMsgs[b.dataset.ad]));
+  $('#dl').onclick=()=>toast('Downloaded. It is 4 GB of tracking data and 2 videos.');
+  $('#real').onclick=()=>{toast('Dodged the ads.');next();};
+}
+
+/* ---------- Bait and switch ---------- */
+function Bait(){
+  setGoal('Get rid of the rating popup without keeping your plan.');
+  stage.innerHTML=app(`<div class="body" style="position:relative;text-align:center">
+    <button class="x" id="x" aria-label="Close">✕</button>
+    <h2 style="padding:0 34px">How was your Glimmr+ experience?</h2>
+    <div class="stars" id="stars">${[1,2,3,4,5].map(n=>`<button data-n="${n}" aria-label="${n} stars">★</button>`).join('')}</div>
+    <button class="btn brand" id="rate">Submit rating</button>
+    <button class="btn ghost" id="skip">Skip rating</button>
+    <p class="fine" style="font-size:10px;margin:6px 0 0">By closing this window you confirm you'd like to keep Glimmr+ Ultra.</p>
+  </div>`,'Quick question');
+  document.querySelectorAll('#stars button').forEach(b=>b.onclick=()=>{
+    const n=+b.dataset.n;
+    document.querySelectorAll('#stars button').forEach(s=>s.classList.toggle('on',+s.dataset.n<=n));
+    if(n<5) toast('Only 5-star ratings are published. Just so you know.');
+  });
+  $('#rate').onclick=()=>charge(4.99,'Rating us counted as "renewed interest".');
+  $('#x').onclick=()=>charge(14.99,'The ✕ meant "keep my plan". It said so in tiny text.');
+  $('#skip').onclick=()=>{toast('Skipped. The ✕ was the trap.');next();};
+}
+
+/* ---------- Fake progress + friend spam ---------- */
+function Progress(){
+  setGoal('Wait for the cancellation to finish processing.');
+  stage.innerHTML=app(`<div class="body">
+    <h2>Processing your cancellation</h2>
+    <div class="bar"><i id="fill"></i></div>
+    <p class="fine" id="pct">0%</p>
+    <div id="popzone"></div>
+  </div>`,'Processing…');
+  let p=0;
+  const fill=v=>{$('#fill').style.width=v+'%';$('#pct').textContent=v+'%';};
+  const t=setInterval(()=>{p=Math.min(99,p+Math.ceil(Math.random()*9));fill(p);if(p>=99){clearInterval(t);$('#pct').textContent='99%. Waiting for you…';invite();}},220);
+  timers.push(t);
+  function invite(){
+    const people=['Mom','Your boss','Your ex','Your dentist','312 other contacts'];
+    $('#popzone').innerHTML=`<div class="pop">
+      <h3>While you wait: don't let your friends miss out!</h3>
+      ${people.map(n=>`<label class="check tiny" style="margin:0 0 6px"><input type="checkbox" checked><span>${n}</span></label>`).join('')}
+      <div style="height:8px"></div>
+      <button class="btn brand" id="send">Send invites</button>
+      <button class="btn ghost" id="nah">Not now</button></div>`;
+    $('#send').onclick=()=>charge(0,'Invited your ex. And your boss. And your dentist.');
+    $('#nah').onclick=notify;
+  }
+  function notify(){
+    $('#popzone').innerHTML=`<div class="pop">
+      <h3>Want us to tell you when it's done?</h3>
+      <p class="fine">Turn on notifications. We'll only send the important ones.*</p>
+      <div class="row"><button class="btn plain" id="block">Don't allow</button><button class="btn brand" id="allow">Allow</button></div>
+      <p class="fine" style="font-size:10px;margin:0">*About 11 a day.</p></div>`;
+    $('#allow').onclick=()=>charge(0,'You will now get 11 notifications a day.');
+    $('#block').onclick=()=>{$('#popzone').innerHTML='';fill(100);$('#pct').textContent='100%. Done!';timers.push(setTimeout(next,700));};
+  }
+}
+
+const LEVELS=[Easy1,Easy2,L2,L1,L3,L4,Ads,Bait,L5,Progress,L6,L7];
+
+/* ---------- End ---------- */
+function end(){
+  clearTimers();level=TOTAL;dots();$('#goal').hidden=true;
+  const verdict=traps===0?'Flawless. Glimmr+ legal would like a word.':
+    traps<4?'Pretty good. The designers are mildly annoyed.':
+    traps<9?'Not bad. Glimmr+ made a little money off you.':
+    'Glimmr+ thanks you for your continued support.';
+  stage.innerHTML=`<div class="intro">
+    <h1>Cancelled.</h1>
+    <p>${verdict}</p>
+    <div class="receipt">
+      <div style="display:flex;justify-content:space-between"><span>Traps you fell for</span><span>${traps}</span></div>
+      <div class="total"><span>Total charged</span><b>${fmt(charged)}</b></div>
+    </div>
+    <p style="font-weight:700;margin-top:26px">The dark patterns you just beat</p>
+    <ol class="patterns">
+      <li><b>The lure</b><span>Two honest, friendly screens taught you that the big pink button is always right, then a fake success screen made you relax.</span></li>
+      <li><b>Pre-selected consent</b><span>Tracking switched on by default, a giant "Accept all", and a toggle that turns itself back on.</span></li>
+      <li><b>Trick questions and confirmshaming</b><span>Double-negative checkboxes, and "No" buttons worded to make you feel silly for clicking them.</span></li>
+      <li><b>Roach motel</b><span>Signing up takes one tap. Cancelling is buried in the footer under a vague name.</span></li>
+      <li><b>Nagging and misdirection</b><span>Repeated offers, and button labels like "Continue" that mean the opposite of what you want.</span></li>
+      <li><b>Disguised ads</b><span>Ads styled exactly like the real buttons, with labels too small to notice.</span></li>
+      <li><b>Bait and switch</b><span>A ✕ that looks like "close" but actually means "keep my plan".</span></li>
+      <li><b>Sneak into basket, false urgency and drip pricing</b><span>Pre-ticked add-ons, a countdown that never ends, and a fee that appears only after you remove everything else.</span></li>
+      <li><b>Friend spam and notification nagging</b><span>A progress bar that stalls at 99% until you deal with pre-ticked invites to all your contacts.</span></li>
+      <li><b>Obstruction</b><span>Close buttons that dodge you and chatbots you must get past.</span></li>
+      <li><b>Forced friction</b><span>Pasting blocked and "helpful" autocorrect that changes your answer.</span></li>
+    </ol>
+    <button class="btn brand start" id="again">Resubscribe and try again</button>
+  </div>`;
+  $('#again').onclick=intro;
+  window.scrollTo(0,0);
+}
+
+intro();
+</script>
+</body>
+</html>
